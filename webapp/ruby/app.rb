@@ -43,18 +43,17 @@ class Isucon2App < Sinatra::Base
 
     def purge_cache(uri)
       system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
-      return 0;
 
-      uri = uri.is_a?(URI) ? uri : URI.parse(uri)
-      Net::HTTP.start(uri.host,uri.port) do |http|
-        presp = http.request Net::HTTP::Purge.new uri.request_uri
-        $stdout.puts "#{presp.code}: #{presp.message}" if development?
-        unless (200...400).include?(presp.code.to_i)
-          $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
-        else
-          $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
-        end
-      end
+      #uri = uri.is_a?(URI) ? uri : URI.parse(uri)
+      #Net::HTTP.start(uri.host,uri.port) do |http|
+      #  presp = http.request Net::HTTP::Purge.new uri.request_uri
+      #  $stdout.puts "#{presp.code}: #{presp.message}" if development?
+      #  unless (200...400).include?(presp.code.to_i)
+      #    $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
+      #  else
+      #    $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
+      #  end
+      #end
     end
 
     def connection
@@ -166,20 +165,24 @@ class Isucon2App < Sinatra::Base
        WHERE variation_id = #{ params[:variation_id] } AND order_id IS NULL
        ORDER BY RAND() LIMIT 1",
     )
+
+    ticket_id = mysql.query(
+        "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
+      ).first['ticket_id']
+
+    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+    5.times do |i|
+      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+    end
+
     if mysql.affected_rows > 0
       seat_id = mysql.query(
         "SELECT seat_id FROM stock WHERE order_id = #{ order_id } LIMIT 1",
       ).first['seat_id']
       mysql.query('COMMIT')
 
-      ticket_id = mysql.query(
-        "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
-      ).first['ticket_id']
       update_ticket_count(ticket_id)
-
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
-      purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
     else
       mysql.query('ROLLBACK')
       slim :soldout
