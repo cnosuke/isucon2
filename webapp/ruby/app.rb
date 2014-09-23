@@ -1,4 +1,18 @@
-# -*- coding: utf-8 -*-
+# for benchmark at local environment
+# Use Rack::Cache as cache
+def staging?
+  ENV['RACK_ENV'] == 'staging'
+end
+
+# Use varnish as cache
+def production?
+  ENV['RACK_ENV'] == 'production'
+end
+
+def development?
+  @is_development ||= !(production? || staging?)
+end
+
 require 'sinatra/base'
 require 'slim'
 require 'json'
@@ -6,7 +20,7 @@ require 'mysql2'
 require 'net/http'
 require 'rack/cache'
 
-if ENV['RACK_ENV'] != 'production'
+if development?
   require 'pry'
   require "rack-lineprof"
 end
@@ -26,7 +40,7 @@ class Isucon2App < Sinatra::Base
   set :slim, pretty: true, layout: true
   set :port, 3000
 
-  # use Rack::Cache
+  use Rack::Cache if staging?
 
   configure do
     #set static_cache_control: [:public, max_age: 60*60]
@@ -83,19 +97,6 @@ class Isucon2App < Sinatra::Base
 
         return @dict[arg.to_i - 1]
       end
-    end
-
-    def development?
-      !production?
-    end
-
-    # for benchmark at local environment
-    def staging?
-      ENV['RACK_ENV'] == 'staging'
-    end
-
-    def production?
-      ENV['RACK_ENV'] == 'production'
     end
 
     def purge_cache(path)
