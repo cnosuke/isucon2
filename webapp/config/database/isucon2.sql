@@ -45,10 +45,12 @@ CREATE TABLE IF NOT EXISTS isucon2.order_request (
 ) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS isucon2.recent_sold (
-  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `seat_id` INT UNSIGNED NOT NULL,
-  `a_name` VARCHAR(255) NOT NULL,
-  `t_name` VARCHAR(255) NOT NULL,
-  `v_name` VARCHAR(255) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM;
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `seat_id` int(10) unsigned NOT NULL,
+  `order_id` int(10) unsigned DEFAULT NULL,
+  `a_name` varchar(255) NOT NULL,
+  `t_name` varchar(255) NOT NULL,
+  `v_name` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_id` (`order_id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
