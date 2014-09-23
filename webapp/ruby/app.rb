@@ -165,7 +165,8 @@ class Isucon2App < Sinatra::Base
 
     def update_ticket_count(ticket_id)
       mysql = connection
-      mysql.query("UPDATE ticket SET count = #{ticket_count(ticket_id)} WHERE id = #{ticket_id}")
+      count = ticket_count(ticket_id)
+      mysql.query("UPDATE ticket SET count = #{count} WHERE id = #{ticket_id}")
     end
 
     def ticket_count(ticket_id)
