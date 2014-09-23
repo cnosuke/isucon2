@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 require 'sinatra/base'
 require 'slim'
 require 'json'
@@ -36,7 +37,7 @@ class Isucon2App < Sinatra::Base
   helpers do
 
     def dict(arg)
-      if define?(@dict)
+      if defined?(@dict)
         @dict[arg.to_i - 1]
       else
         @dict = []
