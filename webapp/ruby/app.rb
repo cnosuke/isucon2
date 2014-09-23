@@ -254,6 +254,7 @@ class Isucon2App < Sinatra::Base
       end
     end
     initialize_count
+    update_recent_sold
 
     redirect '/admin', 302
   end
