@@ -141,7 +141,7 @@ class Isucon2App < Sinatra::Base
     def update_recent_sold
       mysql = connection
 
-      recent_sold = mysql.query('SELECT seat_id, variation_id FROM stock ORDER BY order_id DESC LIMIT 10').to_a
+      recent_sold = mysql.query('SELECT order_id, seat_id, variation_id FROM stock WHERE order_id IS NOT NULL ORDER BY order_id DESC LIMIT 10').to_a
       return [] if recent_sold.size == 0
 
       recent_sold.each do |stock|
@@ -151,7 +151,7 @@ class Isucon2App < Sinatra::Base
       end
 
       values = recent_sold.map { |data|
-        %Q{('#{data["seat_id"]}',#{data["order_id"] ? data["order_id"] : "NULL" },'#{data["a_name"]}','#{data["t_name"]}','#{data["v_name"]}')}
+        %Q{('#{data["seat_id"]}',#{data["order_id"] ? data["order_id"] : "NULL" },'#{data[:a_name]}','#{data[:t_name]}','#{data[:v_name]}')}
       }.join(",")
       mysql.query(<<-SQL)
         INSERT INTO recent_sold (seat_id, order_id, a_name, t_name, v_name)
@@ -337,6 +337,7 @@ class Isucon2App < Sinatra::Base
 
   post '/admin' do
     mysql = connection
+    mysql.query('delete from recent_sold')
     open(File.dirname(__FILE__) + '/../config/database/initial_data.sql') do |file|
       file.each do |line|
         next unless line.strip!.length > 0
