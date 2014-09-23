@@ -42,6 +42,9 @@ class Isucon2App < Sinatra::Base
     end
 
     def purge_cache(uri)
+      system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
+      return 0;
+
       uri = uri.is_a?(URI) ? uri : URI.parse(uri)
       Net::HTTP.start(uri.host,uri.port) do |http|
         presp = http.request Net::HTTP::Purge.new uri.request_uri
@@ -165,9 +168,10 @@ class Isucon2App < Sinatra::Base
     end
 
     purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-    5.times{|i|
-      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
-    }
+    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
+    #5.times{|i|
+    #  purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+    #}
   end
 
   # admin
