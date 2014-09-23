@@ -35,6 +35,7 @@ end
 
 class Isucon2App < Sinatra::Base
   AWS_HOST = 'http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com'.freeze
+  STAGING_HOST = 'http://127.0.0.1:3000'.freeze
 
   $stdout.sync = true if development?
   set :slim, pretty: true, layout: true
@@ -100,19 +101,35 @@ class Isucon2App < Sinatra::Base
     end
 
     def purge_cache(path)
-      return if staging?
+      if production?
+        # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
 
-      # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
-      uri = File.join(AWS_HOST, path)
-      uri = uri.is_a?(URI) ? uri : URI.parse(uri)
-      Net::HTTP.start(uri.host,uri.port) do |http|
-        presp = http.request Net::HTTP::Purge.new uri.request_uri
-        $stdout.puts "#{presp.code}: #{presp.message}" if development?
-        unless (200...400).include?(presp.code.to_i)
-          $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
-        else
-          $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
+        uri = generate_uri(AWS_HOST, path)
+        Net::HTTP.start(uri.host,uri.port) do |http|
+          presp = http.request Net::HTTP::Purge.new uri.request_uri
+          # $stdout.puts "#{presp.code}: #{presp.message}" if development?
+          unless (200...400).include?(presp.code.to_i)
+            $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
+          else
+            # $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
+          end
         end
+      elsif staging?
+        # url = generate_uri(STAGING_HOST, path)
+
+        # Net::HTTP.start(uri.host, uri.port) do |http|
+        #   presp = http.request Net::HTTP::Purge.new uri.request_uri
+        # end
+      end
+    end
+
+    def generate_uri(host, path)
+      uri = File.join(AWS_HOST, path)
+
+      if uri.is_a?(URI)
+        uri
+      else
+        URI.parse(uri)
       end
     end
 
