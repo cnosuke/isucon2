@@ -42,6 +42,7 @@ class Isucon2App < Sinatra::Base
     end
 
     def purge_cache(uri)
+      return 0;
       uri = uri.is_a?(URI) ? uri : URI.parse(uri)
       Net::HTTP.start(uri.host,uri.port) do |http|
         presp = http.request Net::HTTP::Purge.new uri.request_uri
