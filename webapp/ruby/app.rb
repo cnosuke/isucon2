@@ -21,6 +21,7 @@ end
 class Isucon2App < Sinatra::Base
   $stdout.sync = true if development?
   set :slim, :pretty => true, :layout => true
+  set :port, 3000
 
   use Rack::Cache
 
@@ -42,18 +43,18 @@ class Isucon2App < Sinatra::Base
     end
 
     def purge_cache(uri)
-      system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
+      # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
 
-      #uri = uri.is_a?(URI) ? uri : URI.parse(uri)
-      #Net::HTTP.start(uri.host,uri.port) do |http|
-      #  presp = http.request Net::HTTP::Purge.new uri.request_uri
-      #  $stdout.puts "#{presp.code}: #{presp.message}" if development?
-      #  unless (200...400).include?(presp.code.to_i)
-      #    $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
-      #  else
-      #    $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
-      #  end
-      #end
+      uri = uri.is_a?(URI) ? uri : URI.parse(uri)
+      Net::HTTP.start(uri.host,uri.port) do |http|
+        presp = http.request Net::HTTP::Purge.new uri.request_uri
+        $stdout.puts "#{presp.code}: #{presp.message}" if development?
+        unless (200...400).include?(presp.code.to_i)
+          $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
+        else
+          $stdout.puts "Cache purged (#{presp.code.to_i}): #{uri.request_uri}" if development?
+        end
+      end
     end
 
     def connection
