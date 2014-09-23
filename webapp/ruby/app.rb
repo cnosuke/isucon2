@@ -25,7 +25,7 @@ class Isucon2App < Sinatra::Base
   use Rack::Cache
 
   configure do
-    set static_cache_control: [:public, max_age: 60*60]
+    #set static_cache_control: [:public, max_age: 60*60]
   end
 
   if development?
@@ -115,7 +115,7 @@ class Isucon2App < Sinatra::Base
   # main
 
   get '/' do
-    cache_control :public, max_age: 600
+    #cache_control :public, max_age: 600
     mysql = connection
     artists = mysql.query("SELECT * FROM artist ORDER BY id")
     slim :index, :locals => {
@@ -124,7 +124,7 @@ class Isucon2App < Sinatra::Base
   end
 
   get '/artist/:artistid' do
-    cache_control :public, max_age: 600
+    #cache_control :public, max_age: 600
     mysql = connection
     artist  = mysql.query(
       "SELECT id, name FROM artist WHERE id = #{ params[:artistid] } LIMIT 1",
@@ -204,12 +204,12 @@ class Isucon2App < Sinatra::Base
   # admin
 
   get '/admin' do
-    cache_control :public, max_age: 600
+    #cache_control :public, max_age: 600
     slim :admin
   end
 
   get '/admin/order.csv' do
-    cache_control :public, max_age: 600
+    #cache_control :public, max_age: 600
     mysql = connection
     body  = ''
     orders = mysql.query(
