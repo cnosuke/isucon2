@@ -159,7 +159,11 @@ class Isucon2App < Sinatra::Base
       ).first['ticket_id']
 
       purge_cache('http://localhost/')
-      purge_cache("http://localhost/ticket/#{ticket_id}")
+      purge_cache("http://localhost/ticket/1")
+      purge_cache("http://localhost/ticket/2")
+      purge_cache("http://localhost/ticket/3")
+      purge_cache("http://localhost/ticket/4")
+      purge_cache("http://localhost/ticket/5")
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
