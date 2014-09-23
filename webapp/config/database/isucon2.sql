@@ -54,4 +54,3 @@ CREATE TABLE IF NOT EXISTS isucon2.recent_sold (
   PRIMARY KEY (`id`),
   UNIQUE KEY `order_id` (`order_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
