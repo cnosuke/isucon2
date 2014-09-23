@@ -42,6 +42,9 @@ class Isucon2App < Sinatra::Base
     end
 
     def purge_cache(uri)
+      system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
+      return 0;
+
       uri = uri.is_a?(URI) ? uri : URI.parse(uri)
       Net::HTTP.start(uri.host,uri.port) do |http|
         presp = http.request Net::HTTP::Purge.new uri.request_uri
@@ -79,6 +82,28 @@ class Isucon2App < Sinatra::Base
          ORDER BY order_id DESC LIMIT 10',
       )
     end
+
+    def initialize_count
+      mysql = connection
+      tickets = mysql.query("SELECT id FROM ticket")
+      tickets.each do |ticket|
+        update_ticket_count(ticket['id'])
+      end
+    end
+
+    def update_ticket_count(ticket_id)
+      mysql = connection
+      mysql.query("UPDATE ticket SET count = #{ticket_count(ticket_id)} WHERE id = #{ticket_id}")
+    end
+
+    def ticket_count(ticket_id)
+      mysql = connection
+      mysql.query(
+        "SELECT COUNT(*) AS cnt FROM variation
+         INNER JOIN stock ON stock.variation_id = variation.id
+         WHERE variation.ticket_id = #{ ticket_id } AND stock.order_id IS NULL",
+      ).first["cnt"]
+    end
   end
 
   # main
@@ -99,15 +124,8 @@ class Isucon2App < Sinatra::Base
       "SELECT id, name FROM artist WHERE id = #{ params[:artistid] } LIMIT 1",
     ).first
     tickets = mysql.query(
-      "SELECT id, name FROM ticket WHERE artist_id = #{ artist['id'] } ORDER BY id",
+      "SELECT id, name, count FROM ticket WHERE artist_id = #{ artist['id'] } ORDER BY id",
     )
-    tickets.each do |ticket|
-      ticket["count"] = mysql.query(
-        "SELECT COUNT(*) AS cnt FROM variation
-         INNER JOIN stock ON stock.variation_id = variation.id
-         WHERE variation.ticket_id = #{ ticket['id'] } AND stock.order_id IS NULL",
-      ).first["cnt"]
-    end
     slim :artist, :locals => {
       :artist  => artist,
       :tickets => tickets,
@@ -157,17 +175,19 @@ class Isucon2App < Sinatra::Base
       ticket_id = mysql.query(
         "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
       ).first['ticket_id']
-
-      purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-      5.times{|i| 
-        purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
-      }
+      update_ticket_count(ticket_id)
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
       mysql.query('ROLLBACK')
       slim :soldout
     end
+
+    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
+    #5.times{|i|
+    #  purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+    #}
   end
 
   # admin
@@ -202,6 +222,8 @@ class Isucon2App < Sinatra::Base
         mysql.query(line)
       end
     end
+    initialize_count
+
     redirect '/admin', 302
   end
 
