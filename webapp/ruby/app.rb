@@ -35,7 +35,7 @@ class Isucon2App < Sinatra::Base
 
   helpers do
 
-    def dict(variation_id: arg)
+    def dict(arg)
       variation = [
         {id: 1, name: 'アリーナ席'},
         {id: 2, name: 'スタンド席'},
@@ -47,7 +47,7 @@ class Isucon2App < Sinatra::Base
         {id: 8, name: 'スタンド席'},
         {id: 9, name: 'アリーナ席'},
         {id: 10, name: 'スタンド席'},
-      ][arg.to_i]
+      ][arg.to_i - 1]
       if variation[:id] < 3
         ticket = {id: 1, name: '西武ドームライブ'}
       elsif variation[:id] < 5
@@ -67,9 +67,9 @@ class Isucon2App < Sinatra::Base
       end
 
       {
-        valiation: variation,
-        ticket: ticket,
-        artist: artist,
+        v_name: variation['name'],
+        t_name: ticket['name'],
+        a_name: artist['name'],
       }
     end
 
@@ -130,24 +130,10 @@ class Isucon2App < Sinatra::Base
 
       return [] if recent_sold.size == 0
 
-      variations = mysql.query('SELECT id, name, ticket_id from variation')
       recent_sold.each do |stock|
-        variation = variations.find { |v| v['id'] == stock['variation_id'] }
-        stock['v_name'] = variation['name']
-        stock['ticket_id'] = variation['ticket_id']
-      end
-
-      tickets = mysql.query('SELECT id, name, artist_id FROM ticket')
-      recent_sold.each do |stock|
-        ticket = tickets.find { |t| t['id'] == stock['ticket_id'] }
-        stock['t_name'] = ticket['name']
-        stock['artist_id'] = ticket['artist_id']
-      end
-
-      artists = mysql.query('SELECT id, name FROM artist')
-      recent_sold.each do |stock|
-        artist = artists.find { |a| a['id'] == stock['artist_id'] }
-        stock['a_name'] = artist['name']
+        dict(stock['variation_id']).each do |key, value|
+          stock[key] = value
+        end
       end
 
       values = recent_sold.map { |data|
