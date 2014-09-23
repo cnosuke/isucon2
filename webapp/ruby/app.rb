@@ -87,11 +87,18 @@ class Isucon2App < Sinatra::Base
       !production?
     end
 
+    # for benchmark at local environment
+    def staging?
+      ENV['RACK_ENV'] == 'staging'
+    end
+
     def production?
       ENV['RACK_ENV'] == 'production'
     end
 
     def purge_cache(uri)
+      return if staging?
+
       # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
 
       uri = uri.is_a?(URI) ? uri : URI.parse(uri)
