@@ -1,12 +1,12 @@
 # for benchmark at local environment
 # Use Rack::Cache as cache
 def staging?
-  ENV['RACK_ENV'] == 'staging'
+  @is_staging ||= ENV['RACK_ENV'] == 'staging'
 end
 
 # Use varnish as cache
 def production?
-  ENV['RACK_ENV'] == 'production'
+  @is_production ||= ENV['RACK_ENV'] == 'production'
 end
 
 def development?
