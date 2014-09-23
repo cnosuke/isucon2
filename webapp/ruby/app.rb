@@ -142,9 +142,6 @@ class Isucon2App < Sinatra::Base
       mysql = connection
 
       recent_sold = mysql.query('SELECT seat_id, variation_id FROM stock ORDER BY order_id DESC LIMIT 10').to_a
-
-
-
       return [] if recent_sold.size == 0
 
       recent_sold.each do |stock|
@@ -288,7 +285,7 @@ class Isucon2App < Sinatra::Base
 
       decrement_ticket_count(ticket_id)
 
-      return <<EOB
+      return <<-EOB
 <!DOCTYPE html>
 <html>
   <head>
@@ -309,7 +306,7 @@ class Isucon2App < Sinatra::Base
     <div id="content"><h2>予約完了</h2>会員ID:<span class="member_id">#{params[:member_id]}</span>で<span class="result" data-result="success">&quot;<span class="seat">#{seat_id}</span>&quot;の席を購入しました。</span></div>
   </body>
 </html>
-EOB
+      EOB
     else
       mysql.query('ROLLBACK')
       slim :soldout
