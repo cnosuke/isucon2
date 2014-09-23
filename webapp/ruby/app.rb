@@ -23,7 +23,7 @@ class Isucon2App < Sinatra::Base
   AWS_HOST = 'http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com'.freeze
 
   $stdout.sync = true if development?
-  set :slim, :pretty => true, :layout => true
+  set :slim, pretty: true, layout: true
   set :port, 3000
 
   # use Rack::Cache
@@ -120,12 +120,12 @@ class Isucon2App < Sinatra::Base
 
       config = JSON.parse(IO.read(File.dirname(__FILE__) + "/../config/common.#{ ENV['ISUCON_ENV'] || 'local' }.json"))['database']
       @connection = Mysql2::Client.new(
-        :host => config['host'],
-        :port => config['port'],
-        :username => config['username'],
-        :password => config['password'],
-        :database => config['dbname'],
-        :reconnect => true,
+        host: config['host'],
+        port: config['port'],
+        username: config['username'],
+        password: config['password'],
+        database: config['dbname'],
+        reconnect: true,
       )
     end
 
@@ -198,8 +198,8 @@ class Isucon2App < Sinatra::Base
     #cache_control :public, max_age: 600
     mysql = connection
     artists = mysql.query("SELECT * FROM artist ORDER BY id")
-    slim :index, :locals => {
-      :artists => artists,
+    slim :index, locals: {
+      artists: artists,
     }
   end
 
@@ -212,9 +212,9 @@ class Isucon2App < Sinatra::Base
     tickets = mysql.query(
       "SELECT id, name, count FROM ticket WHERE artist_id = #{ artist['id'] } ORDER BY id",
     )
-    slim :artist, :locals => {
-      :artist  => artist,
-      :tickets => tickets,
+    slim :artist, locals: {
+      artist: artist,
+      tickets: tickets,
     }
   end
 
