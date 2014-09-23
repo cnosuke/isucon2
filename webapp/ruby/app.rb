@@ -209,9 +209,6 @@ class Isucon2App < Sinatra::Base
        ORDER BY RAND() LIMIT 1",
     )
 
-    ticket_id = mysql.query(
-        "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
-      ).first['ticket_id']
 
     if mysql.affected_rows > 0
       update_recent_sold
@@ -220,6 +217,10 @@ class Isucon2App < Sinatra::Base
         "SELECT seat_id FROM stock WHERE order_id = #{ order_id } LIMIT 1",
       ).first['seat_id']
       mysql.query('COMMIT')
+
+      ticket_id = mysql.query(
+        "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
+      ).first['ticket_id']
 
       update_ticket_count(ticket_id)
 
