@@ -67,9 +67,9 @@ class Isucon2App < Sinatra::Base
       end
 
       {
-        v_name: variation['name'],
-        t_name: ticket['name'],
-        a_name: artist['name'],
+        v_name: variation[:name],
+        t_name: ticket[:name],
+        a_name: artist[:name],
       }
     end
 
