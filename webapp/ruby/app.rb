@@ -178,13 +178,12 @@ class Isucon2App < Sinatra::Base
       update_ticket_count(ticket_id)
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
+      purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
     else
       mysql.query('ROLLBACK')
       slim :soldout
     end
-
-    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
     #5.times{|i|
     #  purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
     #}
