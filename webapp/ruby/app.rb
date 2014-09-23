@@ -129,13 +129,7 @@ class Isucon2App < Sinatra::Base
 
     def recent_sold
       mysql = connection
-      recent_sold = mysql.query('SELECT seat_id, a_name, t_name, v_name FROM recent_sold ORDER BY order_id DESC LIMIT 10')
-
-      if recent_sold.size > 0
-        recent_sold
-      else
-        update_recent_sold
-      end
+      mysql.query('SELECT seat_id, a_name, t_name, v_name FROM recent_sold ORDER BY order_id DESC LIMIT 10')
     end
 
     def update_recent_sold
