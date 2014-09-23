@@ -256,6 +256,11 @@ class Isucon2App < Sinatra::Base
     initialize_count
     update_recent_sold
 
+    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+    5.times do |i|
+      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+    end
+
     redirect '/admin', 302
   end
 
