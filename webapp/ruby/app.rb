@@ -188,7 +188,7 @@ class Isucon2App < Sinatra::Base
   end
 
 
-  get '/purge_all_cache'
+  get '/purge_all_cache' do
     purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
     purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/1")
     purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/2")
