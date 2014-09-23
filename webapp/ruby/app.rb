@@ -281,7 +281,7 @@ class Isucon2App < Sinatra::Base
 
       decrement_ticket_count(ticket_id)
 
-      slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
+      erb :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
       mysql.query('ROLLBACK')
       slim :soldout
