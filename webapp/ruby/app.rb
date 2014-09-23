@@ -263,7 +263,7 @@ class Isucon2App < Sinatra::Base
     mysql.query(
       "UPDATE stock SET order_id = #{ order_id }
        WHERE variation_id = #{ params[:variation_id] } AND order_id IS NULL
-       ORDER BY RAND() LIMIT 1",
+       LIMIT 1",
     )
 
 
