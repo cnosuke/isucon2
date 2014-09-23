@@ -153,8 +153,7 @@ class Isucon2App < Sinatra::Base
       values = recent_sold.map { |data|
         %Q{('#{data["seat_id"]}',#{data["order_id"] ? data["order_id"] : "NULL" },'#{data["a_name"]}','#{data["t_name"]}','#{data["v_name"]}')}
       }.join(",")
-      mysql.query(
-        "
+      mysql.query(<<-SQL)
         INSERT INTO recent_sold (seat_id, order_id, a_name, t_name, v_name)
         VALUES #{values}
         ON DUPLICATE KEY UPDATE
@@ -163,8 +162,7 @@ class Isucon2App < Sinatra::Base
           recent_sold.a_name=VALUES(a_name),
           recent_sold.t_name=VALUES(t_name),
           recent_sold.v_name=VALUES(v_name)
-        "
-      )
+      SQL
 
       recent_sold
     end
