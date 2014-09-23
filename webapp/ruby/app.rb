@@ -36,41 +36,50 @@ class Isucon2App < Sinatra::Base
   helpers do
 
     def dict(arg)
-      variation = [
-        {id: 1, name: 'アリーナ席'},
-        {id: 2, name: 'スタンド席'},
-        {id: 3, name: 'アリーナ席'},
-        {id: 4, name: 'スタンド席'},
-        {id: 5, name: 'アリーナ席'},
-        {id: 6, name: 'スタンド席'},
-        {id: 7, name: 'アリーナ席'},
-        {id: 8, name: 'スタンド席'},
-        {id: 9, name: 'アリーナ席'},
-        {id: 10, name: 'スタンド席'},
-      ][arg.to_i - 1]
-      if variation[:id] < 3
-        ticket = {id: 1, name: '西武ドームライブ'}
-      elsif variation[:id] < 5
-        ticket = {id: 2, name: '東京ドームライブ'}
-      elsif variation[:id] < 7
-        ticket = {id: 3, name: 'さいたまスーパーアリーナライブ'}
-      elsif variation[:id] < 9
-        ticket = {id: 4, name: '横浜アリーナライブ'}
-      elsif variation[:id] < 11
-        ticket = {id: 5, name: '西武ドームライブ'}
-      end
-
-      if ticket[:id] < 3
-        artist = {id: 1, name: 'NHN48'}
+      if define?(@dict)
+        @dict[arg.to_i - 1]
       else
-        artist = {id: 2, name: 'はだいろクローバーZ'}
-      end
+        @dict = []
+        10.times do |idx|
+          variation = [
+            {id: 1, name: 'アリーナ席'},
+            {id: 2, name: 'スタンド席'},
+            {id: 3, name: 'アリーナ席'},
+            {id: 4, name: 'スタンド席'},
+            {id: 5, name: 'アリーナ席'},
+            {id: 6, name: 'スタンド席'},
+            {id: 7, name: 'アリーナ席'},
+            {id: 8, name: 'スタンド席'},
+            {id: 9, name: 'アリーナ席'},
+            {id: 10, name: 'スタンド席'},
+          ][idx]
+          if variation[:id] < 3
+            ticket = {id: 1, name: '西武ドームライブ'}
+          elsif variation[:id] < 5
+            ticket = {id: 2, name: '東京ドームライブ'}
+          elsif variation[:id] < 7
+            ticket = {id: 3, name: 'さいたまスーパーアリーナライブ'}
+          elsif variation[:id] < 9
+            ticket = {id: 4, name: '横浜アリーナライブ'}
+          elsif variation[:id] < 11
+            ticket = {id: 5, name: '西武ドームライブ'}
+          end
 
-      {
-        v_name: variation[:name],
-        t_name: ticket[:name],
-        a_name: artist[:name],
-      }
+          if ticket[:id] < 3
+            artist = {id: 1, name: 'NHN48'}
+          else
+            artist = {id: 2, name: 'はだいろクローバーZ'}
+          end
+
+          @dict << {
+            v_name: variation[:name],
+            t_name: ticket[:name],
+            a_name: artist[:name],
+          }
+        end
+
+        return @dict[arg.to_i - 1]
+      end
     end
 
     def development?
