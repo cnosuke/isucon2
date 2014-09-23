@@ -158,12 +158,10 @@ class Isucon2App < Sinatra::Base
         "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
       ).first['ticket_id']
 
-      purge_cache('http://localhost/')
-      purge_cache("http://localhost/ticket/1")
-      purge_cache("http://localhost/ticket/2")
-      purge_cache("http://localhost/ticket/3")
-      purge_cache("http://localhost/ticket/4")
-      purge_cache("http://localhost/ticket/5")
+      purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+      5.times{|i| 
+        purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+      }
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
