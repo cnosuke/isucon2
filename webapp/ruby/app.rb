@@ -124,7 +124,7 @@ class Isucon2App < Sinatra::Base
     end
 
     def generate_uri(host, path)
-      uri = File.join(AWS_HOST, path)
+      uri = File.join(host, path)
 
       if uri.is_a?(URI)
         uri
