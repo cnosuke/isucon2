@@ -179,6 +179,11 @@ class Isucon2App < Sinatra::Base
       mysql.query("UPDATE ticket SET count = #{count} WHERE id = #{ticket_id}")
     end
 
+    def decrement_ticket_count(ticket_id)
+      mysql = connection
+      mysql.query("UPDATE ticket SET count = count - 1 WHERE id = #{ticket_id}")
+    end
+
     def ticket_count(ticket_id)
       mysql = connection
       mysql.query(
@@ -274,7 +279,7 @@ class Isucon2App < Sinatra::Base
         "SELECT ticket_id FROM variation WHERE id = #{ mysql.escape(params[:variation_id]) } LIMIT 1",
       ).first['ticket_id']
 
-      update_ticket_count(ticket_id)
+      decrement_ticket_count(ticket_id)
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
