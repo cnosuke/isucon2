@@ -187,6 +187,17 @@ class Isucon2App < Sinatra::Base
     }
   end
 
+
+  get '/purge_all_cache'
+    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/1")
+    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/2")
+    5.times do |i|
+      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+    end
+    "OK"
+  end
+
   post '/buy' do
     mysql = connection
     mysql.query('BEGIN')
@@ -211,9 +222,6 @@ class Isucon2App < Sinatra::Base
       mysql.query('COMMIT')
 
       update_ticket_count(ticket_id)
-
-      purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{ticket_id}")
 
       slim :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
     else
