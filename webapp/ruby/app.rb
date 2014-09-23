@@ -281,7 +281,28 @@ class Isucon2App < Sinatra::Base
 
       decrement_ticket_count(ticket_id)
 
-      erb :complete, :locals => { :seat_id => seat_id, :member_id => params[:member_id] }
+      return <<EOB
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>isucon 2</title>
+    <link href="/css/ui-lightness/jquery-ui-1.8.24.custom.css" rel="stylesheet" type="text/css" />
+    <link href="/css/isucon2.css" rel="stylesheet" type="text/css" />
+    <script src="/js/jquery-1.8.2.min.js" type="text/javascript"></script>
+    <script src="/js/jquery-ui-1.8.24.custom.min.js" type="text/javascript"></script>
+    <script src="/js/isucon2.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <header>
+      <a href="/"><img src="/images/isucon_title.jpg" /></a>
+    </header>
+    <div id="sidebar">
+    </div>
+    <div id="content"><h2>予約完了</h2>会員ID:<span class="member_id">#{params[:member_id]}</span>で<span class="result" data-result="success">&quot;<span class="seat">#{seat_id}</span>&quot;の席を購入しました。</span></div>
+  </body>
+</html>
+EOB
     else
       mysql.query('ROLLBACK')
       slim :soldout
