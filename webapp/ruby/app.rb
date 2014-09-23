@@ -20,6 +20,8 @@ module Net
 end
 
 class Isucon2App < Sinatra::Base
+  AWS_HOST = 'http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com'.freeze
+
   $stdout.sync = true if development?
   set :slim, :pretty => true, :layout => true
   set :port, 3000
@@ -96,11 +98,11 @@ class Isucon2App < Sinatra::Base
       ENV['RACK_ENV'] == 'production'
     end
 
-    def purge_cache(uri)
+    def purge_cache(path)
       return if staging?
 
       # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
-
+      uri = File.join(AWS_HOST, path)
       uri = uri.is_a?(URI) ? uri : URI.parse(uri)
       Net::HTTP.start(uri.host,uri.port) do |http|
         presp = http.request Net::HTTP::Purge.new uri.request_uri
@@ -242,11 +244,11 @@ class Isucon2App < Sinatra::Base
 
 
   get '/purge_all_cache' do
-    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
-    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/1")
-    purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/artist/2")
+    purge_cache("/")
+    purge_cache("/artist/1")
+    purge_cache("/artist/2")
     5.times do |i|
-      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+      purge_cache("/ticket/#{i+1}")
     end
     "OK"
   end
@@ -341,9 +343,9 @@ class Isucon2App < Sinatra::Base
     initialize_count
     update_recent_sold
 
-    purge_cache('http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/')
+    purge_cache('/')
     5.times do |i|
-      purge_cache("http://ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com/ticket/#{i+1}")
+      purge_cache("/ticket/#{i+1}")
     end
 
     redirect '/admin', 302
