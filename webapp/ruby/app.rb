@@ -24,7 +24,7 @@ class Isucon2App < Sinatra::Base
   set :slim, :pretty => true, :layout => true
   set :port, 3000
 
-  use Rack::Cache
+  # use Rack::Cache
 
   configure do
     #set static_cache_control: [:public, max_age: 60*60]
