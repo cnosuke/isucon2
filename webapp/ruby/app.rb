@@ -3,6 +3,7 @@ require 'slim'
 require 'json'
 require 'mysql2'
 require 'net/http'
+require 'rack/cache'
 
 if ENV['RACK_ENV'] != 'production'
   require 'pry'
@@ -20,6 +21,12 @@ end
 class Isucon2App < Sinatra::Base
   $stdout.sync = true if development?
   set :slim, :pretty => true, :layout => true
+
+  use Rack::Cache
+
+  configure do
+    set static_cache_control: [:public, max_age: 60*60]
+  end
 
   if development?
     use Rack::Lineprof, profile: "views/*|app.rb"
@@ -108,6 +115,7 @@ class Isucon2App < Sinatra::Base
   # main
 
   get '/' do
+    cache_control :public, max_age: 600
     mysql = connection
     artists = mysql.query("SELECT * FROM artist ORDER BY id")
     slim :index, :locals => {
@@ -116,6 +124,7 @@ class Isucon2App < Sinatra::Base
   end
 
   get '/artist/:artistid' do
+    cache_control :public, max_age: 600
     mysql = connection
     artist  = mysql.query(
       "SELECT id, name FROM artist WHERE id = #{ params[:artistid] } LIMIT 1",
@@ -137,6 +146,7 @@ class Isucon2App < Sinatra::Base
   end
 
   get '/ticket/:ticketid' do
+    cache_control :public, max_age: 600
     mysql = connection
     ticket = mysql.query(
       "SELECT t.*, a.name AS artist_name FROM ticket t
@@ -195,10 +205,12 @@ class Isucon2App < Sinatra::Base
   # admin
 
   get '/admin' do
+    cache_control :public, max_age: 600
     slim :admin
   end
 
   get '/admin/order.csv' do
+    cache_control :public, max_age: 600
     mysql = connection
     body  = ''
     orders = mysql.query(
