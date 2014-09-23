@@ -123,18 +123,32 @@ class Isucon2App < Sinatra::Base
 
     def update_recent_sold
       mysql = connection
-      recent_sold = mysql.query(
-        'SELECT stock.seat_id, variation.name AS v_name, ticket.name AS t_name, artist.name AS a_name FROM stock
-           JOIN variation ON stock.variation_id = variation.id
-           JOIN ticket ON variation.ticket_id = ticket.id
-           JOIN artist ON ticket.artist_id = artist.id
-         WHERE order_id IS NOT NULL
-         ORDER BY order_id DESC LIMIT 10',
-      ).to_a
+
+      recent_sold = mysql.query('SELECT seat_id, variation_id FROM stock ORDER BY order_id DESC LIMIT 10').to_a
 
 
 
       return [] if recent_sold.size == 0
+
+      variations = mysql.query('SELECT id, name, ticket_id from variation')
+      recent_sold.each do |stock|
+        variation = variations.find { |v| v['id'] == stock['variation_id'] }
+        stock['v_name'] = variation['name']
+        stock['ticket_id'] = variation['ticket_id']
+      end
+
+      tickets = mysql.query('SELECT id, name, artist_id FROM ticket')
+      recent_sold.each do |stock|
+        ticket = tickets.find { |t| t['id'] == stock['ticket_id'] }
+        stock['t_name'] = ticket['name']
+        stock['artist_id'] = ticket['artist_id']
+      end
+
+      artists = mysql.query('SELECT id, name FROM artist')
+      recent_sold.each do |stock|
+        artist = artists.find { |a| a['id'] == stock['artist_id'] }
+        stock['a_name'] = artist['name']
+      end
 
       values = recent_sold.map { |data|
         %Q{('#{data["seat_id"]}',#{data["order_id"] ? data["order_id"] : "NULL" },'#{data["a_name"]}','#{data["t_name"]}','#{data["v_name"]}')}
