@@ -146,7 +146,6 @@ class Isucon2App < Sinatra::Base
   end
 
   get '/ticket/:ticketid' do
-    cache_control :public, max_age: 600
     mysql = connection
     ticket = mysql.query(
       "SELECT t.*, a.name AS artist_name FROM ticket t
