@@ -34,7 +34,8 @@ module Net
 end
 
 class Isucon2App < Sinatra::Base
-  AWS_HOST = 'http://ec2-54-64-129-51.ap-northeast-1.compute.amazonaws.com/'.freeze
+  # AWS_HOST = 'http://ec2-54-64-129-51.ap-northeast-1.compute.amazonaws.com/'.freeze
+  AWS_HOST = 'http://localhost/'.freeze
   STAGING_HOST = 'http://127.0.0.1:3000'.freeze
 
   $stdout.sync = true if development?
