@@ -262,12 +262,12 @@ class Isucon2App < Sinatra::Base
 
 
   get '/purge_all_cache' do
-    ban_cache("/")
-    ban_cache("/artist/1")
-    ban_cache("/artist/2")
-    5.times do |i|
-      ban_cache("/ticket/#{i+1}")
-    end
+    ban_cache("/") # SmartBan
+#    ban_cache("/artist/1")
+#    ban_cache("/artist/2")
+#    5.times do |i|
+#      ban_cache("/ticket/#{i+1}")
+#    end
     "OK"
   end
 
@@ -361,10 +361,10 @@ class Isucon2App < Sinatra::Base
     initialize_count
     update_recent_sold
 
-    ban_cache('/')
-    5.times do |i|
-      ban_cache("/ticket/#{i+1}")
-    end
+    ban_cache('/') # SmartBan
+    #5.times do |i|
+    #  ban_cache("/ticket/#{i+1}")
+    #end
 
     redirect '/admin', 302
   end
