@@ -26,15 +26,15 @@ if development?
 end
 
 module Net
-  class HTTP::Purge < HTTPRequest
-        METHOD='PURGE'
+  class HTTP::Ban < HTTPRequest
+        METHOD = 'BAN'
         REQUEST_HAS_BODY = false
         RESPONSE_HAS_BODY = true
   end
 end
 
 class Isucon2App < Sinatra::Base
-  AWS_HOST = 'http://ec2-54-64-161-199.ap-northeast-1.compute.amazonaws.com/'.freeze
+  AWS_HOST = 'http://ec2-54-64-129-51.ap-northeast-1.compute.amazonaws.com/'.freeze
   STAGING_HOST = 'http://127.0.0.1:3000'.freeze
 
   $stdout.sync = true if development?
@@ -100,13 +100,13 @@ class Isucon2App < Sinatra::Base
       end
     end
 
-    def purge_cache(path)
+    def ban_cache(path)
       if production?
-        # system("curl -X PURGE -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
+        # system("curl -X BAN -H 'Host: ec2-54-64-183-81.ap-northeast-1.compute.amazonaws.com' '#{uri}' >/dev/null 2>&1")
 
         uri = generate_uri(AWS_HOST, path)
         Net::HTTP.start(uri.host,uri.port) do |http|
-          presp = http.request Net::HTTP::Purge.new uri.request_uri
+          presp = http.request Net::HTTP::Ban.new uri.request_uri
           # $stdout.puts "#{presp.code}: #{presp.message}" if development?
           unless (200...400).include?(presp.code.to_i)
             $stdout.puts "A problem occurred. PURGE was not performed(#{presp.code.to_i}): #{uri.request_uri}"
@@ -262,11 +262,11 @@ class Isucon2App < Sinatra::Base
 
 
   get '/purge_all_cache' do
-    purge_cache("/")
-    purge_cache("/artist/1")
-    purge_cache("/artist/2")
+    ban_cache("/")
+    ban_cache("/artist/1")
+    ban_cache("/artist/2")
     5.times do |i|
-      purge_cache("/ticket/#{i+1}")
+      ban_cache("/ticket/#{i+1}")
     end
     "OK"
   end
@@ -361,9 +361,9 @@ class Isucon2App < Sinatra::Base
     initialize_count
     update_recent_sold
 
-    purge_cache('/')
+    ban_cache('/')
     5.times do |i|
-      purge_cache("/ticket/#{i+1}")
+      ban_cache("/ticket/#{i+1}")
     end
 
     redirect '/admin', 302
